@@ -1,7 +1,10 @@
+import { useRef } from 'react';
 import { theme, cardStyle, buttonStyle } from './styles';
 import { DEMO_CSV } from './dataUtils';
 
 export default function InputScreen({ onGenerate }) {
+  const fileInputRef = useRef(null);
+
   const handleSubmit = () => {
     const textarea = document.getElementById('csv-input');
     const text = textarea?.value?.trim();
@@ -15,6 +18,18 @@ export default function InputScreen({ onGenerate }) {
   const handleLoadDemo = () => {
     const textarea = document.getElementById('csv-input');
     if (textarea) textarea.value = DEMO_CSV;
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const textarea = document.getElementById('csv-input');
+      if (textarea) textarea.value = evt.target.result;
+    };
+    reader.readAsText(file);
+    e.target.value = '';
   };
 
   return (
@@ -39,8 +54,16 @@ export default function InputScreen({ onGenerate }) {
           Dashboard de Vendas
         </h1>
         <p style={{ color: theme.colors.textMuted, marginBottom: '24px', fontSize: '15px' }}>
-          Cole seus dados de vendas em CSV para gerar o dashboard.
+          Cole seus dados de vendas em CSV ou faça upload de um arquivo.
         </p>
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv,.txt"
+          onChange={handleFileUpload}
+          style={{ display: 'none' }}
+        />
 
         <textarea
           id="csv-input"
@@ -62,6 +85,25 @@ export default function InputScreen({ onGenerate }) {
         />
 
         <div style={{ display: 'flex', gap: '12px', marginTop: '20px', flexWrap: 'wrap' }}>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              ...buttonStyle,
+              background: 'transparent',
+              border: `1px solid ${theme.colors.border}`,
+              color: theme.colors.textMuted,
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.borderColor = theme.colors.green;
+              e.target.style.color = theme.colors.green;
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.borderColor = theme.colors.border;
+              e.target.style.color = theme.colors.textMuted;
+            }}
+          >
+            Upload CSV
+          </button>
           <button
             onClick={handleLoadDemo}
             style={{
